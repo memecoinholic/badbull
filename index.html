@@ -1,0 +1,1882 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>$BADBULL — The Baddest Bull on chain</title>
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;900&display=swap');
+
+    :root {
+      --pink: #0049ff;
+      --cyan: #00f5ff;
+      --yellow: #00ff43;
+      --purple: #56ff11;
+      --bg: #0a0012;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── VIDEO BACKGROUND ── */
+    #bgVideo {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      z-index: 0;
+    }
+    #bgVideoOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,0,18,.55);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ── CANVAS BACKGROUND ── */
+    #bgCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 40px;
+      background: rgba(10,0,18,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,45,120,.25);
+    }
+    .nav-logo {
+      font-family: 'Bangers', cursive;
+      font-size: 2rem;
+      letter-spacing: 3px;
+      background: linear-gradient(90deg, var(--pink), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a {
+      text-decoration: none;
+      color: rgba(255,255,255,.75);
+      font-weight: 700;
+      font-size: .95rem;
+      letter-spacing: 1px;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--cyan); }
+    #musicBtn {
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,.25);
+      color: #fff;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .2s, color .2s, transform .15s, box-shadow .15s;
+      flex-shrink: 0;
+    }
+    #musicBtn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      transform: scale(1.12);
+      box-shadow: 0 0 14px rgba(0,245,255,.4);
+    }
+    #musicBtn.muted {
+      border-color: rgba(255,255,255,.15);
+      color: rgba(255,255,255,.3);
+    }
+
+    .nav-buy {
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      border: none;
+      color: #fff;
+      font-family: 'Bangers', cursive;
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      padding: 10px 26px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 0 20px rgba(255,45,120,.5);
+    }
+    .nav-buy:hover {
+      transform: scale(1.07);
+      box-shadow: 0 0 35px rgba(255,45,120,.8);
+    }
+
+    /* ── SECTIONS WRAPPER ── */
+    section { position: relative; z-index: 3; }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 20px 60px;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,0,255,.35) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      pointer-events: none;
+      animation: pulseGlow 3s ease-in-out infinite alternate;
+    }
+    @keyframes pulseGlow {
+      from { opacity: .6; transform: translate(-50%,-50%) scale(1); }
+      to   { opacity: 1;  transform: translate(-50%,-50%) scale(1.15); }
+    }
+
+    /* ── DISCO BALL ── */
+    .disco-ball {
+      position: absolute;
+      top: 90px; left: 50%;
+      transform: translateX(-50%);
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fff 2%, #c0c0c0 30%, #666 80%);
+      box-shadow:
+        0 0 15px #fff,
+        0 0 40px rgba(255,255,255,.4),
+        inset -5px -5px 15px rgba(0,0,0,.6);
+      animation: spinBall 4s linear infinite;
+      overflow: hidden;
+    }
+    .disco-ball::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 8px, rgba(0,0,0,.3) 8px, rgba(0,0,0,.3) 9px
+      ),
+      repeating-linear-gradient(
+        90deg, transparent, transparent 8px, rgba(0,0,0,.3) 8px, rgba(0,0,0,.3) 9px
+      );
+      border-radius: 50%;
+    }
+    @keyframes spinBall { from { transform: translateX(-50%) rotate(0); } to { transform: translateX(-50%) rotate(360deg); } }
+
+    /* ── DOG CHARACTER ── */
+    .dog-wrap {
+      position: relative;
+      width: 220px; height: 220px;
+      margin: 20px auto 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .dog-wrap:hover .dog-svg { filter: drop-shadow(0 0 22px var(--cyan)); }
+
+    .dog-svg {
+      width: 100%; height: 100%;
+      animation: dogDance 0.5s steps(1) infinite;
+      filter: drop-shadow(0 0 14px var(--pink));
+      transition: filter .2s;
+    }
+    @keyframes dogDance {
+      0%   { transform: rotate(-6deg) translateY(0); }
+      25%  { transform: rotate(0deg)  translateY(-8px); }
+      50%  { transform: rotate(6deg)  translateY(0); }
+      75%  { transform: rotate(0deg)  translateY(-8px); }
+      100% { transform: rotate(-6deg) translateY(0); }
+    }
+    .dog-wrap.spin .dog-svg {
+      animation: dogSpin .6s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes dogSpin {
+      0%   { transform: rotate(0)    scale(1); }
+      50%  { transform: rotate(180deg) scale(1.3); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+    .click-hint {
+      font-size: .8rem;
+      color: rgba(255,255,255,.45);
+      margin-top: 4px;
+      letter-spacing: 1px;
+      animation: blink 2s ease infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── HERO TEXT ── */
+    .hero-title {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(4rem, 12vw, 9rem);
+      letter-spacing: 6px;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--yellow) 0%, var(--pink) 50%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: textShimmer 3s linear infinite;
+      background-size: 200%;
+    }
+    @keyframes textShimmer {
+      0%   { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    .hero-ticker {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(1.4rem, 4vw, 2.4rem);
+      letter-spacing: 8px;
+      color: var(--cyan);
+      text-shadow: 0 0 18px var(--cyan);
+      margin: 6px 0 16px;
+    }
+    .hero-tagline {
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      color: rgba(255,255,255,.8);
+      max-width: 520px;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+    .hero-tagline span { color: var(--yellow); font-weight: 900; }
+
+    /* ── BUTTONS ── */
+    .btn-row { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
+    .ca-box  { margin-bottom: 20px; }
+    .hero-socials { margin-bottom: 32px; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--pink) 0%, var(--purple) 100%);
+      border: none; color: #fff;
+      font-family: 'Bangers', cursive;
+      font-size: 1.4rem; letter-spacing: 3px;
+      padding: 16px 44px; border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(255,45,120,.6);
+      transition: transform .15s, box-shadow .15s;
+      position: relative; overflow: hidden;
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background .2s;
+    }
+    .btn-primary:hover { transform: scale(1.08); box-shadow: 0 0 50px rgba(255,45,120,.9); }
+    .btn-primary:active::after { background: rgba(255,255,255,.15); }
+
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid var(--cyan);
+      color: var(--cyan);
+      font-family: 'Bangers', cursive;
+      font-size: 1.4rem; letter-spacing: 3px;
+      padding: 14px 44px; border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(0,245,255,.3), inset 0 0 20px rgba(0,245,255,.05);
+      transition: transform .15s, box-shadow .15s, background .15s, color .15s;
+    }
+    .btn-secondary:hover {
+      background: var(--cyan);
+      color: #000;
+      transform: scale(1.08);
+      box-shadow: 0 0 40px rgba(0,245,255,.7);
+    }
+
+    /* ── SCROLL INDICATOR ── */
+    .scroll-down {
+      position: absolute;
+      bottom: 30px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column;
+      align-items: center; gap: 6px;
+      color: rgba(255,255,255,.4);
+      font-size: .75rem; letter-spacing: 2px;
+      animation: bounceDown 2s ease infinite;
+    }
+    .scroll-down svg { width: 24px; }
+    @keyframes bounceDown {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ── TICKER TAPE ── */
+    .ticker-tape {
+      background: linear-gradient(90deg, var(--pink), var(--purple), var(--cyan), var(--pink));
+      background-size: 300%;
+      animation: tapeGrad 5s linear infinite;
+      padding: 12px 0;
+      overflow: hidden;
+      white-space: nowrap;
+      font-family: 'Bangers', cursive;
+      font-size: 1.1rem;
+      letter-spacing: 4px;
+      color: #fff;
+    }
+    @keyframes tapeGrad { 0%{background-position:0%} 100%{background-position:300%} }
+    .ticker-inner {
+      display: inline-block;
+      animation: tickerScroll 20s linear infinite;
+    }
+    @keyframes tickerScroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── ABOUT ── */
+    #about {
+      padding: 100px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 60px;
+    }
+    .section-title {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      letter-spacing: 4px;
+      text-align: center;
+      background: linear-gradient(90deg, var(--yellow), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 28px;
+      max-width: 1100px;
+      width: 100%;
+    }
+    .about-card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px;
+      padding: 36px 28px;
+      text-align: center;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .about-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: -60px;
+      width: 150px; height: 150px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,45,120,.15), transparent 70%);
+      pointer-events: none;
+    }
+    .about-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--pink);
+      box-shadow: 0 10px 40px rgba(255,45,120,.25);
+    }
+    .card-emoji { font-size: 3.2rem; margin-bottom: 16px; display: block; }
+    .card-title {
+      font-family: 'Bangers', cursive;
+      font-size: 1.7rem;
+      letter-spacing: 2px;
+      color: var(--cyan);
+      margin-bottom: 10px;
+    }
+    .card-text {
+      color: rgba(255,255,255,.7);
+      line-height: 1.7;
+      font-size: .95rem;
+    }
+
+    /* ── MUSIC VISUALIZER BAR ── */
+    .visualizer {
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+      height: 60px;
+      margin: 10px auto;
+    }
+    .bar {
+      width: 10px;
+      border-radius: 4px 4px 0 0;
+      background: linear-gradient(to top, var(--pink), var(--cyan));
+      animation: barBeat var(--dur, .6s) ease-in-out infinite alternate;
+      box-shadow: 0 0 8px var(--pink);
+    }
+    @keyframes barBeat {
+      from { height: 8px; opacity: .5; }
+      to   { height: var(--h, 50px); opacity: 1; }
+    }
+
+    /* ── TOKENOMICS ── */
+    #tokenomics {
+      padding: 100px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 60px;
+    }
+    .token-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      max-width: 900px;
+      width: 100%;
+    }
+    .token-card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(0,245,255,.2);
+      border-radius: 20px;
+      padding: 36px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, border-color .2s;
+    }
+    .token-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--cyan);
+      box-shadow: 0 0 30px rgba(0,245,255,.2);
+    }
+    .token-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--pink), var(--cyan));
+    }
+    .token-num {
+      font-family: 'Bangers', cursive;
+      font-size: 2.8rem;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, var(--yellow), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .token-label {
+      color: rgba(255,255,255,.6);
+      font-size: .9rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* ── DOUGHNUT CHART ── */
+    .chart-wrap {
+      position: relative;
+      width: 260px; height: 260px;
+      margin: 0 auto;
+    }
+    #donutChart { width: 260px; height: 260px; }
+    .chart-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .chart-center-label {
+      font-family: 'Bangers', cursive;
+      font-size: 2.2rem;
+      letter-spacing: 2px;
+      color: var(--yellow);
+    }
+    .chart-center-sub {
+      font-size: .75rem;
+      color: rgba(255,255,255,.5);
+      letter-spacing: 2px;
+    }
+    .chart-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-self: center;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: .9rem; color: rgba(255,255,255,.8);
+    }
+    .legend-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .token-layout {
+      display: flex;
+      gap: 60px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 800px;
+    }
+
+    /* ── HOW TO BUY ── */
+    #howtobuy {
+      padding: 100px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 60px;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      max-width: 1000px;
+      width: 100%;
+    }
+    .step {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 36px 24px;
+      text-align: center;
+      position: relative;
+      transition: transform .2s, border-color .2s;
+    }
+    .step:hover {
+      transform: translateY(-6px) scale(1.02);
+      border-color: var(--yellow);
+      box-shadow: 0 0 30px rgba(255,230,0,.2);
+    }
+    .step-num {
+      position: absolute;
+      top: -18px; left: 50%; transform: translateX(-50%);
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      font-family: 'Bangers', cursive;
+      font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 12px rgba(255,45,120,.6);
+    }
+    .step-icon { font-size: 2.6rem; margin-bottom: 14px; display: block; }
+    .step-title {
+      font-family: 'Bangers', cursive;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      color: var(--yellow);
+      margin-bottom: 10px;
+    }
+    .step-text { color: rgba(255,255,255,.65); line-height: 1.6; font-size: .9rem; }
+
+    /* ── ROADMAP ── */
+    #roadmap {
+      padding: 100px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 60px;
+    }
+    .roadmap-line {
+      position: relative;
+      max-width: 760px;
+      width: 100%;
+    }
+    .roadmap-line::before {
+      content: '';
+      position: absolute;
+      left: 50%; top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--pink), var(--cyan), var(--yellow));
+      transform: translateX(-50%);
+    }
+    .rm-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+    .rm-item:nth-child(odd)  { flex-direction: row; }
+    .rm-item:nth-child(even) { flex-direction: row-reverse; }
+    .rm-card {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px;
+      padding: 24px 20px;
+      width: calc(50% - 36px);
+      transition: transform .2s, border-color .2s;
+    }
+    .rm-card:hover {
+      transform: scale(1.03);
+      border-color: var(--pink);
+    }
+    .rm-phase {
+      font-family: 'Bangers', cursive;
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      color: var(--pink);
+      margin-bottom: 6px;
+    }
+    .rm-title {
+      font-family: 'Bangers', cursive;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      color: var(--yellow);
+      margin-bottom: 10px;
+    }
+    .rm-text {
+      color: rgba(255,255,255,.65);
+      font-size: .9rem;
+      line-height: 1.6;
+    }
+    .rm-dot {
+      flex-shrink: 0;
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      box-shadow: 0 0 20px rgba(255,45,120,.6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      align-self: center;
+    }
+
+    /* ── COMMUNITY ── */
+    #community {
+      padding: 80px 20px 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 36px;
+      text-align: center;
+    }
+    .community-tagline {
+      font-size: 1.2rem;
+      color: rgba(255,255,255,.7);
+      max-width: 500px;
+      line-height: 1.6;
+    }
+    .social-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .social-btn {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.15);
+      color: #fff;
+      font-family: 'Bangers', cursive;
+      font-size: 1.2rem;
+      letter-spacing: 2px;
+      padding: 14px 30px;
+      border-radius: 50px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .2s, border-color .2s, transform .15s;
+    }
+    .social-btn:hover {
+      background: rgba(255,255,255,.12);
+      border-color: var(--cyan);
+      color: var(--cyan);
+      transform: scale(1.06);
+    }
+    .social-btn svg { width: 22px; height: 22px; fill: currentColor; }
+
+    /* ── CONTRACT ── */
+    .contract-box {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(0,245,255,.25);
+      border-radius: 16px;
+      padding: 20px 30px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .contract-label {
+      font-family: 'Bangers', cursive;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      color: var(--cyan);
+    }
+    .contract-addr {
+      font-family: monospace;
+      font-size: .9rem;
+      color: rgba(255,255,255,.6);
+      word-break: break-all;
+    }
+    .copy-btn {
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      border: none; color: #fff;
+      font-family: 'Bangers', cursive;
+      font-size: 1rem; letter-spacing: 2px;
+      padding: 8px 20px; border-radius: 50px;
+      cursor: pointer;
+      transition: transform .15s;
+    }
+    .copy-btn:hover { transform: scale(1.08); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 32px 20px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      color: rgba(255,255,255,.3);
+      font-size: .85rem;
+      line-height: 1.8;
+    }
+    footer span { color: var(--pink); }
+
+    /* ── CA BOX ── */
+    .ca-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 50px;
+      padding: 10px 18px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      max-width: 100%;
+    }
+    .ca-box:hover {
+      border-color: var(--cyan);
+      background: rgba(0,245,255,.07);
+    }
+    .ca-label {
+      font-family: 'Bangers', cursive;
+      font-size: .95rem;
+      letter-spacing: 2px;
+      color: var(--cyan);
+      white-space: nowrap;
+    }
+    .ca-addr {
+      font-family: monospace;
+      font-size: .85rem;
+      color: rgba(255,255,255,.55);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 260px;
+    }
+    .ca-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: transform .15s;
+    }
+    .ca-box:hover .ca-icon { transform: scale(1.2); }
+    .ca-box.copied {
+      border-color: #00ff88;
+      background: rgba(0,255,136,.08);
+    }
+    .ca-box.copied .ca-icon::after { content: ' ✓'; }
+
+    /* ── SOCIAL LINKS ── */
+    .hero-socials {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+    .hero-social-link {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      text-decoration: none;
+      color: rgba(255,255,255,.7);
+      font-family: 'Bangers', cursive;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 8px 18px;
+      border-radius: 50px;
+      transition: color .2s, border-color .2s, background .2s, transform .15s;
+    }
+    .hero-social-link:hover {
+      color: #fff;
+      transform: translateY(-2px);
+    }
+    .hero-social-link.tg:hover  { border-color: #29b6f6; background: rgba(41,182,246,.1); color: #29b6f6; }
+    .hero-social-link.x:hover   { border-color: #fff;    background: rgba(255,255,255,.08); }
+    .hero-social-link.dex:hover { border-color: var(--yellow); background: rgba(255,230,0,.08); color: var(--yellow); }
+    .hero-social-link svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+
+    /* ── FLOATING NOTES ── */
+    .note {
+      position: fixed;
+      font-size: 1.6rem;
+      pointer-events: none;
+      animation: floatNote 2.5s ease-out forwards;
+      z-index: 999;
+    }
+    @keyframes floatNote {
+      0%   { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-120px) scale(1.5) rotate(30deg); }
+    }
+
+    /* ── RIPPLE ── */
+    .ripple {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      border: 2px solid rgba(255,45,120,.7);
+      animation: rippleOut .8s ease-out forwards;
+      z-index: 9999;
+    }
+    @keyframes rippleOut {
+      0%   { width: 0; height: 0; opacity: 1; margin-top: 0; margin-left: 0; }
+      100% { width: 100px; height: 100px; opacity: 0; margin-top: -50px; margin-left: -50px; }
+    }
+
+    /* ── CONFETTI ── */
+    .confetti-piece {
+      position: fixed;
+      width: 10px; height: 10px;
+      pointer-events: none;
+      animation: confettiFall linear forwards;
+      z-index: 9998;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* ── DRAGGABLE TIKTOK WINDOW ── */
+    #tiktokWindow {
+      position: fixed;
+      display: none;
+      flex-direction: column;
+      width: 340px;
+      height: 560px;
+      top: 60px;
+      right: 40px;
+      z-index: 10002;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(0,0,0,.75), 0 0 0 1.5px rgba(255,45,120,.45);
+      background: #000;
+      user-select: none;
+    }
+    #tiktokVideo { pointer-events: none; }
+    #tiktokTitleBar {
+      background: rgba(18,0,28,.97);
+      border-bottom: 1px solid rgba(255,45,120,.3);
+      padding: 0 14px;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: grab;
+      flex-shrink: 0;
+      gap: 10px;
+    }
+    #tiktokTitleBar:active { cursor: grabbing; }
+    #tiktokWindowLabel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Bangers', cursive;
+      font-size: 1.05rem;
+      letter-spacing: 2px;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #tiktokWindowLabel svg {
+      width: 20px; height: 20px;
+      flex-shrink: 0;
+    }
+    .tiktok-win-btn {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      color: rgba(255,255,255,.7);
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      font-size: .85rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background .15s, color .15s;
+      line-height: 1;
+    }
+    .tiktok-win-btn:hover { background: rgba(255,45,120,.4); color: #fff; border-color: var(--pink); }
+    #tiktokContent {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .tiktok-win {
+      position: fixed;
+      display: none;
+      flex-direction: column;
+      width: 255px;
+      height: 442px;
+      z-index: 10002;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(0,0,0,.75), 0 0 0 1.5px rgba(255,45,120,.45);
+      background: #000;
+      user-select: none;
+    }
+    #tiktokWindow2 { top: 80px; right: 390px; }
+    #tiktokWindow3 { top: 100px; right: 720px; }
+    .tiktokBar {
+      background: rgba(18,0,28,.97);
+      border-bottom: 1px solid rgba(255,45,120,.3);
+      padding: 0 14px;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: grab;
+      flex-shrink: 0;
+      gap: 10px;
+    }
+    .tiktokBar:active { cursor: grabbing; }
+    .tiktokBarLabel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Bangers', cursive;
+      font-size: 1.05rem;
+      letter-spacing: 2px;
+      color: #fff;
+    }
+    .tiktokBody {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .ttwin-views {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 40px 16px 14px;
+      background: linear-gradient(to top, rgba(0,0,0,.85) 0%, transparent 100%);
+      font-family: 'Bangers', cursive;
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 12px rgba(255,45,120,.8);
+      pointer-events: none;
+    }
+    @media (max-width: 768px) {
+      #tiktokWindow { display: none !important; }
+      .tiktok-win   { display: none !important; }
+    }
+
+    /* ── MOBILE TIKTOK SECTION ── */
+    #tiktok-mobile {
+      display: none;
+      padding: 60px 20px;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      #tiktok-mobile { display: flex; }
+    }
+    .ttm-label {
+      font-family: 'Bangers', cursive;
+      font-size: 2.2rem;
+      letter-spacing: 4px;
+      background: linear-gradient(90deg, var(--pink), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .ttm-phone {
+      position: relative;
+      width: min(340px, 88vw);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 2px rgba(255,45,120,.5),
+        0 20px 60px rgba(0,0,0,.7),
+        0 0 40px rgba(255,45,120,.2);
+    }
+    .ttm-phone video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 9/16;
+      object-fit: cover;
+    }
+    .ttm-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 40px 16px 18px;
+      background: linear-gradient(to top, rgba(0,0,0,.85) 0%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .ttm-views {
+      font-family: 'Bangers', cursive;
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 12px rgba(255,45,120,.8);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ttm-handle {
+      font-family: 'Bangers', cursive;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,.7);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ttm-handle svg { width: 16px; height: 16px; fill: currentColor; flex-shrink: 0; }
+    .ttm-follow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+      border: none;
+      color: #fff;
+      font-family: 'Bangers', cursive;
+      font-size: 1.2rem;
+      letter-spacing: 3px;
+      padding: 13px 36px;
+      border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 0 24px rgba(255,45,120,.5);
+      transition: transform .15s, box-shadow .15s;
+      cursor: pointer;
+    }
+    .ttm-follow:hover {
+      transform: scale(1.06);
+      box-shadow: 0 0 40px rgba(255,45,120,.8);
+    }
+    .ttm-follow svg { width: 20px; height: 20px; fill: currentColor; }
+
+    /* ── PRELOADER ── */
+    #preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: url('images/bg1.webp') center center / cover no-repeat;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity .9s ease;
+    }
+    #preloader.hiding { opacity: 0; pointer-events: none; }
+    #click-prompt {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      letter-spacing: 8px;
+      color: var(--cyan);
+      text-shadow: 0 0 22px var(--cyan), 0 0 60px rgba(0,245,255,.4);
+      animation: promptPulse 1.6s ease-in-out infinite;
+      user-select: none;
+      text-align: center;
+    }
+    .prompt-arrow {
+      display: inline-block;
+      animation: arrowBounce .8s ease-in-out infinite alternate;
+    }
+    @keyframes promptPulse { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
+    @keyframes arrowBounce { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav { padding: 12px 20px; }
+      .nav-links { display: none; }
+      .roadmap-line::before { left: 22px; }
+      .rm-item, .rm-item:nth-child(even) {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-left: 60px;
+      }
+      .rm-card { width: 100%; }
+      .rm-dot { position: absolute; left: 2px; }
+      .rm-item { position: relative; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- PRELOADER -->
+<div id="preloader">
+  <div id="click-prompt">
+    <span class="prompt-arrow">▼</span>  CLICK TO ENTER  <span class="prompt-arrow">▼</span>
+  </div>
+</div>
+
+<!-- Video background -->
+<video id="bgVideo" autoplay="" muted="" loop="" playsinline="">
+  <source src="media/bg.mp4" type="video/mp4">
+</video>
+<div id="bgVideoOverlay"></div>
+
+<!-- Particle canvas (on top of video) -->
+<canvas id="bgCanvas" width="1920" height="1080"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">$BADBULL</div>
+  <div class="nav-links">
+    <a href="#tokenomics">Tokenomics</a>
+    <a href="#howtobuy">Buy</a>
+    <a href="#community">Community</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button id="musicBtn" class="muted" title="Toggle music" onclick="toggleMusic()">🔇</button>
+    <button class="nav-buy" onclick="scrollTo({top:document.getElementById('howtobuy').offsetTop-80,behavior:'smooth'})">BUY $BADBULL</button>
+  </div>
+</nav>
+
+<audio id="bgMusic" src="media/mus.mp3" loop="" preload="auto"></audio>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <div class="disco-ball"></div>
+
+  <!-- Visualizer bars -->
+  <div class="visualizer" id="vis1"><div class="bar" style="--h: 38px; --dur: 0.48s;"></div><div class="bar" style="--h: 57px; --dur: 0.45s;"></div><div class="bar" style="--h: 23px; --dur: 0.44s;"></div><div class="bar" style="--h: 30px; --dur: 0.36s;"></div><div class="bar" style="--h: 34px; --dur: 0.44s;"></div><div class="bar" style="--h: 32px; --dur: 0.54s;"></div><div class="bar" style="--h: 15px; --dur: 0.44s;"></div><div class="bar" style="--h: 34px; --dur: 0.42s;"></div><div class="bar" style="--h: 45px; --dur: 0.48s;"></div><div class="bar" style="--h: 20px; --dur: 0.30s;"></div><div class="bar" style="--h: 43px; --dur: 0.48s;"></div><div class="bar" style="--h: 13px; --dur: 0.46s;"></div><div class="bar" style="--h: 47px; --dur: 0.41s;"></div><div class="bar" style="--h: 50px; --dur: 0.50s;"></div><div class="bar" style="--h: 20px; --dur: 0.31s;"></div><div class="bar" style="--h: 41px; --dur: 0.34s;"></div><div class="bar" style="--h: 56px; --dur: 0.47s;"></div><div class="bar" style="--h: 24px; --dur: 0.32s;"></div><div class="bar" style="--h: 58px; --dur: 0.38s;"></div><div class="bar" style="--h: 15px; --dur: 0.30s;"></div><div class="bar" style="--h: 46px; --dur: 0.50s;"></div><div class="bar" style="--h: 56px; --dur: 0.30s;"></div><div class="bar" style="--h: 42px; --dur: 0.34s;"></div><div class="bar" style="--h: 26px; --dur: 0.31s;"></div></div>
+
+
+
+  <h1 class="hero-title">$BADBULL</h1>
+  <p class="hero-tagline">
+    This bull doesn't wait for</span> green candles. 🐂🔥<br>
+    Every dip is just another excuse to charge even harder. 📉💥
+Fear belongs to the herd. BADBULL only knows one direction — forward.
+  </p>
+  <div class="btn-row">
+    <button class="btn-primary" onclick="burstConfetti();scrollTo({top:document.getElementById('howtobuy').offsetTop-80,behavior:'smooth'})">
+      🚀 BUY $BADBULL
+    </button>
+
+  </div>
+
+  <!-- CA -->
+  <div class="ca-box" id="heroCa" onclick="heroCopy()" title="Click to copy">
+    <span class="ca-label">CA:</span>
+    <span class="ca-addr" id="heroCaText">000000000000000000000000000000</span>
+    <span class="ca-icon">📋</span>
+  </div>
+
+  <!-- Socials -->
+  <div class="hero-socials">
+    <a class="hero-social-link tg" href="https://t.me/badbullsolana" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"></path></svg>
+      TELEGRAM
+    </a>
+    <a class="hero-social-link x" href="https://x.com/badbullsolana" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.912-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
+      X
+    </a>
+    <a class="hero-social-link dex" href="https://dexscreener.com/solana/" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h6v2H7v-2z"></path></svg>
+      DEXSCREENER
+    </a>
+  </div>
+
+  <div class="scroll-down">
+    <span>SCROLL</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 5v14M5 12l7 7 7-7"></path>
+    </svg>
+  </div>
+</section>
+
+<!-- TICKER TAPE -->
+<div class="ticker-tape">
+  <div class="ticker-inner" id="tickerInner">🐾 $BADBULL   🚀 TO THE MOON   💎 DIAMOND BULL   🎵 DANCE OR DIE   🌕 MOONBOUND   🔥 DEGEN SZYN   ♪ BEST BULL COIN   🏆 BADBULLS WINS   🐾 $BADBULL   🚀 TO THE MOON   💎 DIAMOND PAWS   🎵 DANCE OR DIE   🌕 MOONBOUND   🔥 DEGEN SZYN   ♪ BEST BULL COIN   🏆 BADBULLS WINS   🐾 $BADBULL   🚀 TO THE MOON   💎 DIAMOND PAWS   🎵 DANCE OR DIE   🌕 MOONBOUND   🔥 DEGEN SZYN   ♪ BEST BULL COIN   🏆 BADBULLS WINS   🐾 $BADBULL   🚀 TO THE MOON   💎 DIAMOND PAWS   🎵 DANCE OR DIE   🌕 MOONBOUND   🔥 DEGEN SZYN   ♪ BEST BULL COIN   🏆 BADBULLS WINS   </div>
+</div>
+
+<!-- MOBILE TIKTOK SECTION -->
+<section id="tiktok-mobile">
+  <div class="ttm-label">AS SEEN ON TIKTOK</div>
+  <div class="ttm-phone">
+    <video src="media/tt2.mp4" autoplay="" muted="" loop="" playsinline=""></video>
+    <div class="ttm-overlay">
+      <div class="ttm-views">👁 1,000,000 VIEWS</div>
+      <div class="ttm-handle">
+        <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.26 8.26 0 0 0 4.83 1.54V6.79a4.85 4.85 0 0 1-1.06-.1z"></path></svg>
+        @badbullofficial
+      </div>
+    </div>
+  </div>
+  <a class="ttm-follow" href="https://www.tiktok.com/@badbullofficial" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.26 8.26 0 0 0 4.83 1.54V6.79a4.85 4.85 0 0 1-1.06-.1z"></path></svg>
+    FOLLOW ON TIKTOK
+  </a>
+</section>
+
+<!-- TOKENOMICS -->
+<section id="tokenomics">
+  <h2 class="section-title">TOKENOMICS</h2>
+  <div class="token-grid">
+    <div class="token-card" style="opacity: 0; transform: translateY(30px); transition: opacity 0.5s, transform 0.5s, border-color 0.2s, box-shadow 0.2s;">
+      <span class="token-num" data-target="1000000000">1B</span>
+      <span class="token-label">Total Supply</span>
+    </div>
+    <div class="token-card" style="opacity: 0; transform: translateY(30px); transition: opacity 0.5s 0.08s, transform 0.5s 0.08s, border-color 0.2s, box-shadow 0.2s;">
+      <span class="token-num">0%</span>
+      <span class="token-label">Buy Tax</span>
+    </div>
+    <div class="token-card" style="opacity: 0; transform: translateY(30px); transition: opacity 0.5s 0.16s, transform 0.5s 0.16s, border-color 0.2s, box-shadow 0.2s;">
+      <span class="token-num">0%</span>
+      <span class="token-label">Sell Tax</span>
+    </div>
+    <div class="token-card" style="opacity: 0; transform: translateY(30px); transition: opacity 0.5s 0.24s, transform 0.5s 0.24s, border-color 0.2s, box-shadow 0.2s;">
+      <span class="token-num">100%</span>
+      <span class="token-label">Vibes</span>
+    </div>
+  </div>
+
+
+</section>
+
+<!-- HOW TO BUY -->
+<section id="howtobuy">
+  <h2 class="section-title">HOW TO BUY</h2>
+  <div class="steps">
+    <div class="step" style="opacity: 0; transform: translateY(30px); transition: opacity 0.5s 0.32s, transform 0.5s 0.32s, border-color 0.2s, box-shadow 0.2s;">
+      <div class="step-num">1</div>
+      <span class="step-icon">👛</span>
+      <div class="step-title">GET A WALLET</div>
+      <p class="step-text">Download Phantom or Solflare. Create your wallet and secure your seed phrase somewhere safe. Never share it.</p>
+    </div>
+    <div class="step" style="opacity: 0; transform: translateY(30px); transition: opacity 0.5s 0.4s, transform 0.5s 0.4s, border-color 0.2s, box-shadow 0.2s;">
+      <div class="step-num">2</div>
+      <span class="step-icon">💰</span>
+      <div class="step-title">ADD SOL</div>
+      <p class="step-text">Buy SOL from any exchange (Coinbase, Binance, Kraken) and transfer it to your wallet. You'll need SOL to swap.</p>
+    </div>
+    <div class="step" style="opacity: 0; transform: translateY(30px); transition: opacity 0.5s 0.48s, transform 0.5s 0.48s, border-color 0.2s, box-shadow 0.2s;">
+      <div class="step-num">3</div>
+      <span class="step-icon">🔄</span>
+      <div class="step-title">SWAP ON DEX</div>
+      <p class="step-text">Head to Pump.swap or Jupiter. Paste the $BADBULL contract address and swap your SOL for $BADBULL. Set slippage to ~2%.</p>
+    </div>
+    <div class="step" style="opacity: 0; transform: translateY(30px); transition: opacity 0.5s 0.56s, transform 0.5s 0.56s, border-color 0.2s, box-shadow 0.2s;">
+      <div class="step-num">4</div>
+      <span class="step-icon">💃</span>
+      <div class="step-title">START DANCING</div>
+      <p class="step-text">Welcome to the BADBULLS party! Share your bag, join the community, and dance with us to the moon. 🌕</p>
+    </div>
+  </div>
+
+  <div class="contract-box">
+    <span class="contract-label">CA:</span>
+    <span class="contract-addr" id="caAddr">000000000000000000000000000000</span>
+    <button class="copy-btn" onclick="copyCA()">COPY</button>
+  </div>
+</section>
+
+
+<!-- COMMUNITY -->
+<section id="community">
+  <h2 class="section-title">JOIN THE FAM</h2>
+  <p class="community-tagline">BADBULLS dances alone no more. Join thousands of degens, believers, and bull lovers in the fastest growing dance floor on the blockchain.</p>
+  <div class="social-row">
+    <a class="social-btn" href="https://x.com/badbullsolana" onclick="spawnNotes(event);return false;">
+      <svg viewBox="0 0 24 24"><path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"></path></svg>
+      TWITTER
+    </a>
+    <a class="social-btn" href="https://t.me/badbullsolana" onclick="spawnNotes(event);return false;">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"></path></svg>
+      TELEGRAM
+    </a>
+    <a class="social-btn" href="https://www.tiktok.com/@badbullofficial" onclick="spawnNotes(event);return false;">
+      <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.26 8.26 0 0 0 4.83 1.54V6.79a4.85 4.85 0 0 1-1.06-.1z"></path></svg>
+      TIKTOK
+    </a>
+  </div>
+
+
+</section>
+
+<!-- DRAGGABLE TIKTOK WINDOW 2 -->
+<div id="tiktokWindow2" class="tiktok-win">
+  <div class="tiktokBar">
+    <span class="tiktokBarLabel">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.26 8.26 0 0 0 4.83 1.54V6.79a4.85 4.85 0 0 1-1.06-.1z" fill="#fff"></path>
+      </svg>
+      @badbullofficial
+    </span>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="tiktok-win-btn tw-open" data-url="https://www.tiktok.com/@badbullofficial" title="Open TikTok">↗</button>
+      <button class="tiktok-win-btn tw-close" title="Close">✕</button>
+    </div>
+  </div>
+  <div class="tiktokBody">
+    <video src="media/tt2.mp4" autoplay="" muted="" loop="" playsinline="" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;"></video>
+    <div class="ttwin-views">👁 1,000,000 VIEWS</div>
+  </div>
+</div>
+
+<!-- DRAGGABLE TIKTOK WINDOW 3 -->
+<div id="tiktokWindow3" class="tiktok-win">
+  <div class="tiktokBar">
+    <span class="tiktokBarLabel">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.26 8.26 0 0 0 4.83 1.54V6.79a4.85 4.85 0 0 1-1.06-.1z" fill="#fff"></path>
+      </svg>
+      @badbullofficial
+    </span>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="tiktok-win-btn tw-open" data-url="https://www.tiktok.com/@badbullofficial" title="Open TikTok">↗</button>
+      <button class="tiktok-win-btn tw-close" title="Close">✕</button>
+    </div>
+  </div>
+  <div class="tiktokBody">
+    <video src="media/tt3.mp4" autoplay="" muted="" loop="" playsinline="" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;"></video>
+    <div class="ttwin-views">👁 1,000,000 VIEWS</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 <span>$BADBULL</span> — The Dancing Bad bulls Coin. All rights reserved.</p>
+  <p style="margin-top:8px">$BADBULL is a memecoin with no intrinsic value or financial return expectation. It's for entertainment purposes only. Always DYOR.</p>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════
+   MUSIC
+═══════════════════════════════════════════════ */
+const bgMusic  = document.getElementById('bgMusic');
+const musicBtn = document.getElementById('musicBtn');
+
+function toggleMusic() {
+  if (bgMusic.paused) {
+    bgMusic.play();
+    musicBtn.textContent = '🎵';
+    musicBtn.classList.remove('muted');
+  } else {
+    bgMusic.pause();
+    musicBtn.textContent = '🔇';
+    musicBtn.classList.add('muted');
+  }
+}
+
+function startMusic() {
+  bgMusic.volume = 0;
+  bgMusic.play().then(() => {
+    musicBtn.textContent = '🎵';
+    musicBtn.classList.remove('muted');
+    /* Fade in volume */
+    let v = 0;
+    const fade = setInterval(() => {
+      v = Math.min(v + 0.03, 0.7);
+      bgMusic.volume = v;
+      if (v >= 0.7) clearInterval(fade);
+    }, 80);
+  }).catch(() => {});
+}
+
+/* ═══════════════════════════════════════════════
+   BACKGROUND PARTICLE SYSTEM
+═══════════════════════════════════════════════ */
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [], discoBeams = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.r = Math.random() * 2 + .5;
+    this.vx = (Math.random() - .5) * .5;
+    this.vy = (Math.random() - .5) * .5;
+    this.alpha = Math.random() * .6 + .2;
+    const hues = ['#00ff48','#00f5ff','#00ff43','#56ff11','#fff'];
+    this.color = hues[Math.floor(Math.random() * hues.length)];
+  }
+  update() {
+    this.x += this.vx; this.y += this.vy;
+    if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.fillStyle = this.color;
+    ctx.shadowBlur = 8; ctx.shadowColor = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// Disco spotlight beams
+class Beam {
+  constructor() {
+    this.angle = Math.random() * Math.PI * 2;
+    this.speed = (Math.random() - .5) * .008;
+    this.hue = Math.random() * 360;
+    this.alpha = Math.random() * .04 + .02;
+    this.length = H * 1.2;
+  }
+  update() {
+    this.angle += this.speed;
+    this.hue = (this.hue + .3) % 360;
+  }
+  draw() {
+    const cx = W / 2, cy = 80;
+    const ex = cx + Math.cos(this.angle) * this.length;
+    const ey = cy + Math.sin(this.angle) * this.length;
+    const grad = ctx.createLinearGradient(cx, cy, ex, ey);
+    grad.addColorStop(0, `hsla(${this.hue},100%,70%,${this.alpha * 4})`);
+    grad.addColorStop(1, `hsla(${this.hue},100%,70%,0)`);
+    ctx.save();
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 80;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+for (let i = 0; i < 180; i++) particles.push(new Particle());
+for (let i = 0; i < 6; i++) discoBeams.push(new Beam());
+
+function bgLoop() {
+  ctx.clearRect(0, 0, W, H);
+  discoBeams.forEach(b => { b.update(); b.draw(); });
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(bgLoop);
+}
+bgLoop();
+
+/* ═══════════════════════════════════════════════
+   MUSIC VISUALIZER BARS
+═══════════════════════════════════════════════ */
+const vis = document.getElementById('vis1');
+const barCount = 24;
+for (let i = 0; i < barCount; i++) {
+  const b = document.createElement('div');
+  b.className = 'bar';
+  const h = Math.floor(Math.random() * 48 + 10);
+  const dur = (Math.random() * .4 + .3).toFixed(2) + 's';
+  b.style.cssText = `--h:${h}px;--dur:${dur}`;
+  vis.appendChild(b);
+}
+
+setInterval(() => {
+  vis.querySelectorAll('.bar').forEach(b => {
+    const h = Math.floor(Math.random() * 52 + 8);
+    const dur = (Math.random() * .3 + .25).toFixed(2) + 's';
+    b.style.setProperty('--h', h + 'px');
+    b.style.setProperty('--dur', dur);
+  });
+}, 400);
+
+/* ═══════════════════════════════════════════════
+   DOG CLICK INTERACTION
+═══════════════════════════════════════════════ */
+const dogWrap = document.getElementById('dogWrap');
+if (dogWrap) {
+  dogWrap.addEventListener('click', e => {
+    dogWrap.classList.remove('spin');
+    void dogWrap.offsetWidth;
+    dogWrap.classList.add('spin');
+    spawnNotes(e);
+    setTimeout(() => dogWrap.classList.remove('spin'), 700);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   FLOATING MUSIC NOTES
+═══════════════════════════════════════════════ */
+const noteSymbols = ['♪','♫','♬','♩','🎵','🎶'];
+function spawnNotes(e) {
+  const x = e.clientX || W / 2;
+  const y = e.clientY || H / 2;
+  for (let i = 0; i < 8; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'note';
+      el.textContent = noteSymbols[Math.floor(Math.random() * noteSymbols.length)];
+      el.style.left = (x + (Math.random() - .5) * 80) + 'px';
+      el.style.top  = (y + (Math.random() - .5) * 40) + 'px';
+      el.style.color = ['#0049ff','#00f5ff','#00ff43','#56ff11'][Math.floor(Math.random()*4)];
+      el.style.animationDuration = (Math.random() * 1 + 1.5) + 's';
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }, i * 80);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   CURSOR RIPPLE
+═══════════════════════════════════════════════ */
+document.addEventListener('click', e => {
+  const r = document.createElement('div');
+  r.className = 'ripple';
+  r.style.left = e.clientX + 'px';
+  r.style.top  = e.clientY + 'px';
+  document.body.appendChild(r);
+  r.addEventListener('animationend', () => r.remove());
+});
+
+/* ═══════════════════════════════════════════════
+   CONFETTI BURST
+═══════════════════════════════════════════════ */
+const confettiColors = ['#0049ff','#00f5ff','#00ff43','#56ff11','#fff','#ff9900'];
+function burstConfetti() {
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = '-20px';
+      el.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+      el.style.width = (Math.random() * 8 + 6) + 'px';
+      el.style.height = (Math.random() * 8 + 6) + 'px';
+      el.style.borderRadius = Math.random() > .5 ? '50%' : '0';
+      el.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      el.style.animationDelay = Math.random() * .5 + 's';
+      document.body.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }, i * 20);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   COUNTER ANIMATION
+═══════════════════════════════════════════════ */
+function animateCount(el, target, duration = 2000) {
+  const start = performance.now();
+  const step = ts => {
+    const progress = Math.min((ts - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 4);
+    const val = Math.floor(eased * target);
+    el.textContent = val >= 1e9 ? (val / 1e9).toFixed(1) + 'B'
+                   : val >= 1e6 ? (val / 1e6).toFixed(0) + 'M'
+                   : val.toLocaleString();
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+const counterObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const target = parseInt(e.target.dataset.target);
+      if (!isNaN(target)) animateCount(e.target, target);
+      counterObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: .5 });
+document.querySelectorAll('[data-target]').forEach(el => counterObserver.observe(el));
+
+/* ═══════════════════════════════════════════════
+   DONUT CHART
+═══════════════════════════════════════════════ */
+function drawDonut() {
+  const c = document.getElementById('donutChart');
+  if (!c) return;
+  const cx2 = c.getContext('2d');
+  const cx = c.width / 2, cy = c.height / 2, r = 100, innerR = 65;
+  const slices = [
+    { pct: .50, color: '#0049ff' },
+    { pct: .25, color: '#56ff11' },
+    { pct: .15, color: '#00f5ff' },
+    { pct: .10, color: '#00ff43' },
+  ];
+  let startAngle = -Math.PI / 2;
+  let targetAngles = slices.map(s => s.pct * Math.PI * 2);
+  let current = new Array(slices.length).fill(0);
+  let start = null;
+  const dur = 1400;
+
+  function animFrame(ts) {
+    if (!start) start = ts;
+    const p = Math.min((ts - start) / dur, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    cx2.clearRect(0, 0, c.width, c.height);
+    let sa = -Math.PI / 2;
+    slices.forEach((s, i) => {
+      const sweepTarget = targetAngles[i];
+      const sweep = sweepTarget * eased;
+      cx2.save();
+      cx2.beginPath();
+      cx2.moveTo(cx, cy);
+      cx2.arc(cx, cy, r, sa, sa + sweep);
+      cx2.closePath();
+      cx2.fillStyle = s.color;
+      cx2.shadowBlur = 12;
+      cx2.shadowColor = s.color;
+      cx2.fill();
+      cx2.restore();
+      sa += sweep;
+    });
+    // Hole
+    cx2.save();
+    cx2.beginPath();
+    cx2.arc(cx, cy, innerR, 0, Math.PI * 2);
+    cx2.fillStyle = '#0a0012';
+    cx2.fill();
+    cx2.restore();
+    if (p < 1) requestAnimationFrame(animFrame);
+  }
+
+  const obs = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) {
+      requestAnimationFrame(animFrame);
+      obs.disconnect();
+    }
+  }, { threshold: .5 });
+  obs.observe(c);
+}
+drawDonut();
+
+/* ═══════════════════════════════════════════════
+   TICKER TAPE
+═══════════════════════════════════════════════ */
+const tickerText = '🐾 $BADBULL   🚀 TO THE MOON   💎 DIAMOND BULLISH   🎵 DANCE OR DIE   🌕 MOONBOUND   🔥 DEGEN SZYN   ♪ BEST BULL COIN   🏆 BADBULLS WINS   ';
+const ti = document.getElementById('tickerInner');
+ti.textContent = tickerText.repeat(4);
+
+/* ═══════════════════════════════════════════════
+   COPY CONTRACT
+═══════════════════════════════════════════════ */
+function heroCopy() {
+  const txt = document.getElementById('heroCaText').textContent;
+  navigator.clipboard.writeText(txt).catch(() => {});
+  const box = document.getElementById('heroCa');
+  box.classList.add('copied');
+  box.querySelector('.ca-icon').textContent = '✅';
+  setTimeout(() => {
+    box.classList.remove('copied');
+    box.querySelector('.ca-icon').textContent = '📋';
+  }, 2000);
+}
+
+function copyCA() {
+  const txt = '000000000000000000000000000000';
+  navigator.clipboard.writeText(txt).catch(() => {});
+  const btn = event.target;
+  btn.textContent = 'COPIED!';
+  setTimeout(() => btn.textContent = 'COPY', 2000);
+}
+
+/* ═══════════════════════════════════════════════
+   AUTO SPAWN NOTES
+═══════════════════════════════════════════════ */
+setInterval(() => {
+  if (Math.random() > .5) {
+    const el = document.createElement('div');
+    el.className = 'note';
+    el.textContent = noteSymbols[Math.floor(Math.random() * noteSymbols.length)];
+    el.style.left = (Math.random() * 80 + 10) + 'vw';
+    el.style.top  = (Math.random() * 60 + 20) + 'vh';
+    el.style.color = ['#0049ff','#00f5ff','#00ff43','#56ff11'][Math.floor(Math.random()*4)];
+    el.style.animationDuration = (Math.random() * 1.5 + 1.5) + 's';
+    el.style.fontSize = (Math.random() * 1.5 + .8) + 'rem';
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}, 700);
+
+/* ═══════════════════════════════════════════════
+   FLOATING + DRAGGABLE TIKTOK WINDOWS (desktop only)
+   Вызывается ПОСЛЕ того как окна показаны (display:flex)
+═══════════════════════════════════════════════ */
+window.initFloatingWindows = function () {
+  if (window.innerWidth <= 768) return;
+
+  var TT_URL = 'https://www.tiktok.com/@badbullofficial';
+
+  /* Собираем все окна с их барами */
+  var pairs = [
+    { win: document.getElementById('tiktokWindow2'), bar: document.querySelector('#tiktokWindow2 .tiktokBar'), side: 'left'  },
+    { win: document.getElementById('tiktokWindow3'), bar: document.querySelector('#tiktokWindow3 .tiktokBar'), side: 'right' }
+  ].filter(function(p) { return p.win && p.bar; });
+
+  /* Кнопки */
+  document.querySelectorAll('.tiktok-win').forEach(function(w) {
+    w.querySelectorAll('.tw-close').forEach(function(b) { b.onclick = function(e) { e.stopPropagation(); w.style.display = 'none'; }; });
+    w.querySelectorAll('.tw-open').forEach(function(b)  { b.onclick = function(e) { e.stopPropagation(); window.open(TT_URL, '_blank', 'noopener'); }; });
+  });
+
+  var VW = window.innerWidth, VH = window.innerHeight;
+  window.addEventListener('resize', function() { VW = window.innerWidth; VH = window.innerHeight; });
+
+  /* Инициализация состояний — окна уже видимы, размеры реальные */
+  var states = pairs.map(function(p) {
+    var W = p.win.offsetWidth, H = p.win.offsetHeight;
+    /* Зоны: левое окно — левая треть, правое — правая треть */
+    var zoneW = VW * 0.32;
+    var xMin = p.side === 'left' ? 0       : VW - zoneW;
+    var xMax = p.side === 'left' ? zoneW - W : VW - W;
+    xMin = Math.max(0, xMin); xMax = Math.max(xMin, xMax);
+    var x = xMin + Math.random() * Math.max(1, xMax - xMin);
+    var y = Math.random() * Math.max(1, VH - H);
+    var speed = 1.5 + Math.random() * 0.8;
+    var angle = p.side === 'left' ? Math.random() * Math.PI * 2 : Math.random() * Math.PI * 2;
+    p.win.style.right = 'auto';
+    p.win.style.left  = x + 'px';
+    p.win.style.top   = y + 'px';
+    return {
+      win: p.win, bar: p.bar,
+      x: x, y: y, w: W, h: H,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      xMin: xMin, xMax: xMax,
+      dragging: false
+    };
+  });
+
+  /* Физика */
+  function loop() {
+    var i, j, a, b, ox, oy, t;
+
+    for (i = 0; i < states.length; i++) {
+      var s = states[i];
+      if (s.dragging) continue;
+
+      s.x += s.vx;
+      s.y += s.vy;
+
+      /* Отскок от стен и границ зоны */
+      if (s.x < s.xMin)   { s.x = s.xMin; s.vx =  Math.abs(s.vx); }
+      if (s.x > s.xMax)   { s.x = s.xMax; s.vx = -Math.abs(s.vx); }
+      if (s.y < 0)        { s.y = 0;      s.vy =  Math.abs(s.vy); }
+      if (s.y > VH - s.h) { s.y = VH - s.h; s.vy = -Math.abs(s.vy); }
+
+      s.win.style.left = s.x + 'px';
+      s.win.style.top  = s.y + 'px';
+    }
+
+    /* Столкновения */
+    for (i = 0; i < states.length; i++) {
+      for (j = i + 1; j < states.length; j++) {
+        a = states[i]; b = states[j];
+        if (a.dragging || b.dragging) continue;
+        ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+        oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+        if (ox <= 0 || oy <= 0) continue;
+        if (ox < oy) {
+          t = a.vx; a.vx = b.vx; b.vx = t;
+          if (a.x < b.x) { a.x -= ox / 2; b.x += ox / 2; }
+          else            { a.x += ox / 2; b.x -= ox / 2; }
+        } else {
+          t = a.vy; a.vy = b.vy; b.vy = t;
+          if (a.y < b.y) { a.y -= oy / 2; b.y += oy / 2; }
+          else            { a.y += oy / 2; b.y -= oy / 2; }
+        }
+      }
+    }
+
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  /* Drag */
+  states.forEach(function(s) {
+    s.bar.addEventListener('mousedown', function(e) {
+      if (e.button !== 0 || e.target.closest('.tiktok-win-btn')) return;
+      s.dragging = true;
+      var dx = e.clientX - s.x, dy = e.clientY - s.y;
+      var prevX = s.x, prevY = s.y;
+      s.bar.style.cursor = 'grabbing';
+      e.preventDefault();
+
+      function onMove(e) {
+        prevX = s.x; prevY = s.y;
+        s.x = Math.max(s.xMin, Math.min(s.xMax, e.clientX - dx));
+        s.y = Math.max(0, Math.min(VH - s.h, e.clientY - dy));
+        s.win.style.left = s.x + 'px';
+        s.win.style.top  = s.y + 'px';
+      }
+      function onUp() {
+        var dvx = s.x - prevX, dvy = s.y - prevY;
+        var spd = Math.sqrt(dvx * dvx + dvy * dvy);
+        if (spd > 0.1) {
+          s.vx = dvx * 0.5; s.vy = dvy * 0.5;
+          var maxSpd = 3, m = Math.sqrt(s.vx*s.vx + s.vy*s.vy);
+          if (m > maxSpd) { s.vx = s.vx/m*maxSpd; s.vy = s.vy/m*maxSpd; }
+        }
+        s.dragging = false;
+        s.bar.style.cursor = 'grab';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  });
+};
+
+/* ═══════════════════════════════════════════════
+   CARD ENTRANCE ANIMATIONS
+═══════════════════════════════════════════════ */
+const slideObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: .15 });
+
+document.querySelectorAll('.about-card, .token-card, .step, .rm-card').forEach((el, i) => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(30px)';
+  el.style.transition = `opacity .5s ${i * .08}s ease, transform .5s ${i * .08}s ease, border-color .2s, box-shadow .2s`;
+  slideObserver.observe(el);
+});
+</script>
+
+<script>
+/* ═══════════════════════════════════════════════
+   PRELOADER — click to enter
+═══════════════════════════════════════════════ */
+(function () {
+  const preloader = document.getElementById('preloader');
+  let entered = false;
+
+  preloader.addEventListener('click', () => {
+    if (entered) return;
+    entered = true;
+    preloader.classList.add('hiding');
+    startMusic();
+    setTimeout(() => {
+      preloader.remove();
+      ['tiktokWindow2','tiktokWindow3'].forEach(id => {
+        var el = document.getElementById(id);
+        if (el) el.style.display = 'flex';
+      });
+      if (window.initFloatingWindows) window.initFloatingWindows();
+    }, 950);
+  });
+})();
+</script>
+
+
+</body></html>
